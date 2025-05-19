@@ -4,11 +4,15 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
 import cors from "cors";
+import cookieParser from 'cookie-parser';
+
 
 dotenv.config();
 connectDB();
-
 const app = express();
+
+app.use(cookieParser());
+
 
 const allowedOrigins = [
   "http://localhost:5173",
