@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -15,14 +17,18 @@ export default function Register() {
         { withCredentials: true }
       );
       sessionStorage.setItem("token", res.data.token);
-      alert("Registration successful. Redirecting to feedback...");
-      window.location.href = "/feedback";
+      toast.success("Registration successful! Redirecting...", {
+        onClose: () => (window.location.href = "/feedback"),
+        autoClose: 2000,
+      });
     } catch (err) {
       if (err.response?.status === 400) {
-        alert("User already exists. Please log in.");
-        window.location.href = "/login";
+        toast.error("User already exists. Redirecting to login...", {
+          onClose: () => (window.location.href = "/login"),
+          autoClose: 2000,
+        });
       } else {
-        alert("Registration failed");
+        toast.error("Registration failed. Please try again.");
         console.error(err);
       }
     }
@@ -30,6 +36,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <ToastContainer position="top-center" autoClose={3000} />
       <form
         onSubmit={handleRegister}
         className="bg-gray-800 p-6 rounded shadow-md w-full max-w-sm space-y-4"
@@ -53,7 +60,7 @@ export default function Register() {
         />
         <button
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 py-2 rounded font-semibold"
+          className="w-full text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
         >
           Register
         </button>

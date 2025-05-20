@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import StarRating from "../components/StarRating";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   ArrowRightOnRectangleIcon,
   ClockIcon,
@@ -16,14 +18,17 @@ export default function FeedbackPage() {
   const [rating, setRating] = useState(0);
   const navigate = useNavigate();
 
-  // Navbar logout
   const handleLogout = () => {
     sessionStorage.removeItem("token");
     navigate("/");
   };
 
-  // Submit feedback
   const submitFeedback = async () => {
+    if (!event || rating === 0) {
+      toast.warning("Please fill out the event name and select a rating.");
+      return;
+    }
+
     try {
       const token = sessionStorage.getItem("token");
       await axios.post(
@@ -36,36 +41,29 @@ export default function FeedbackPage() {
           withCredentials: true,
         }
       );
-      alert("Feedback submitted!");
+      toast.success("Feedback submitted successfully!");
       setEvent("");
       setComment("");
       setRating(0);
     } catch (err) {
       console.error("Feedback submission error:", err);
-      alert("Submission failed");
+      toast.error("Failed to submit feedback.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
+      <ToastContainer position="top-center" autoClose={3000} />
+
       {/* Navbar */}
-      <nav className="bg-gray-900 text-gray-200 shadow-md">
+      <nav className="bg-gray-900 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0">
-              <Link to="/" className="text-white font-bold text-2xl">
-                EventFeedback
-              </Link>
-            </div>
+            <a className="text-white font-bold text-2xl">
+              EventFeedback
+            </a>
 
-            <div className="hidden md:flex space-x-8 items-center">
-              <Link
-                to="/feedback"
-                className="hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Feedback
-              </Link>
-
+            <div className="hidden md:flex space-x-6 items-center">
               <Link
                 to="/history"
                 className="flex items-center gap-1 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
@@ -73,7 +71,6 @@ export default function FeedbackPage() {
                 <ClockIcon className="h-5 w-5" />
                 History
               </Link>
-
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
@@ -86,16 +83,12 @@ export default function FeedbackPage() {
             <div className="md:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none"
-                aria-controls="mobile-menu"
-                aria-expanded={isOpen}
+                className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800"
               >
-                <span className="sr-only">Open main menu</span>
                 {isOpen ? (
-                  <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                  <XMarkIcon className="h-6 w-6" />
                 ) : (
-                  <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                  <Bars3Icon className="h-6 w-6" />
                 )}
               </button>
             </div>
@@ -103,19 +96,12 @@ export default function FeedbackPage() {
         </div>
 
         {isOpen && (
-          <div className="md:hidden bg-gray-800" id="mobile-menu">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link
-                to="/feedback"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-md text-white hover:bg-gray-700 text-base font-medium"
-              >
-                Feedback
-              </Link>
+          <div className="md:hidden bg-gray-800">
+            <div className="px-4 pt-2 pb-3 space-y-1">
               <Link
                 to="/history"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-1 px-3 py-2 rounded-md text-white hover:bg-gray-700 text-base font-medium"
+                className="flex items-center gap-1 px-3 py-2 rounded-md text-white hover:bg-gray-700"
               >
                 <ClockIcon className="h-5 w-5" />
                 History
@@ -125,7 +111,7 @@ export default function FeedbackPage() {
                   handleLogout();
                   setIsOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-base font-medium flex items-center gap-1"
+                className="w-full px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white flex items-center gap-1"
               >
                 <ArrowRightOnRectangleIcon className="h-5 w-5" />
                 Logout
@@ -137,8 +123,9 @@ export default function FeedbackPage() {
 
       {/* Feedback Form */}
       <main className="flex-grow flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-gray-800 p-6 rounded shadow space-y-6">
-          <h2 className="text-2xl font-bold text-white">Leave Feedback</h2>
+        <div className="max-w-xl w-full bg-gray-800 p-8 rounded-lg shadow-lg space-y-6">
+          <h2 className="text-3xl font-bold text-white">Leave Feedback</h2>
+
           <input
             type="text"
             placeholder="Event name"
@@ -146,6 +133,7 @@ export default function FeedbackPage() {
             value={event}
             onChange={(e) => setEvent(e.target.value)}
           />
+
           <textarea
             placeholder="Comment (optional)"
             className="w-full p-3 rounded border border-gray-700 bg-gray-900 text-white resize-none"
@@ -153,12 +141,14 @@ export default function FeedbackPage() {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
+
           <StarRating rating={rating} setRating={setRating} />
+
           <button
             onClick={submitFeedback}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded font-semibold"
+            className="w-full py-3 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-300 font-semibold rounded-lg text-lg transition"
           >
-            Submit
+            Submit Feedback
           </button>
         </div>
       </main>
